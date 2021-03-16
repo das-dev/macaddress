@@ -2,7 +2,7 @@ import os
 import glob
 import unittest
 
-from main import OUIList
+from main import OUIList, validate_mac_address
 
 
 class TestOUIList(unittest.TestCase):
@@ -22,3 +22,16 @@ class TestOUIList(unittest.TestCase):
     def tearDown(self) -> None:
         for filename in glob.glob(self.TEST_STORAGE_FILENAME.format(postfix='*')):
             os.unlink(filename)
+
+
+class TestMACAddress(unittest.TestCase):
+
+    def test_invalid_mac_address(self) -> None:
+        self.assertFalse(validate_mac_address('FF'))
+        self.assertFalse(validate_mac_address('FF.FF.FF.FF.FF.FF'))
+        self.assertFalse(validate_mac_address('FF:FF:FF:FF:FF:XY'))
+        self.assertFalse(validate_mac_address('FF:FF:FF:FF:FF:F'))
+
+    def test_valid_mac_address(self) -> None:
+        self.assertTrue(validate_mac_address('FF:FF:FF:FF:FF:FF'))
+        self.assertTrue(validate_mac_address('ff:ff:ff:ff:ff:ff'))

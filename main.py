@@ -1,3 +1,4 @@
+import re
 import csv
 import json
 import urllib.request
@@ -34,6 +35,20 @@ class OUIList:
     def _load(self) -> Dict[str, str]:
         with open(self.storage_filename) as json_file:
             return json.load(json_file)
+
+
+def validate_mac_address(mac_address: str) -> bool:
+    octets = re.split(r'[:-]', mac_address)
+    if len(octets) != 6:
+        return False
+    for octet in octets:
+        if len(octet) != 2:
+            return False
+        try:
+            int(octet, base=16)
+        except ValueError:
+            return False
+    return True
 
 
 if __name__ == '__main__':
