@@ -2,7 +2,7 @@ import os
 import glob
 import unittest
 
-from main import OUIList, validate_mac_address
+from main import OUIList, OctetsSet, MACAddress
 
 
 class TestOUIList(unittest.TestCase):
@@ -26,12 +26,25 @@ class TestOUIList(unittest.TestCase):
 
 class TestMACAddress(unittest.TestCase):
 
+    def test_invalid_octets_set(self) -> None:
+        with self.assertRaises(ValueError):
+            OctetsSet(':FF:FF:FF')
+        with self.assertRaises(ValueError):
+            OctetsSet('FF:FF:FF:')
+        with self.assertRaises(ValueError):
+            OctetsSet('FF.FF.FF')
+        with self.assertRaises(ValueError):
+            OctetsSet('FF:FF:XY')
+        with self.assertRaises(ValueError):
+            OctetsSet('FF:FF:F')
+
+    def test_valid_octets_set(self) -> None:
+        self.assertEqual(str(OctetsSet('FF:FF:FF')), 'FF:FF:FF')
+        self.assertEqual(str(OctetsSet('ff:ff:ff')), 'FF:FF:FF')
+
     def test_invalid_mac_address(self) -> None:
-        self.assertFalse(validate_mac_address('FF'))
-        self.assertFalse(validate_mac_address('FF.FF.FF.FF.FF.FF'))
-        self.assertFalse(validate_mac_address('FF:FF:FF:FF:FF:XY'))
-        self.assertFalse(validate_mac_address('FF:FF:FF:FF:FF:F'))
+        with self.assertRaises(ValueError):
+            MACAddress('FF:FF:FF')
 
     def test_valid_mac_address(self) -> None:
-        self.assertTrue(validate_mac_address('FF:FF:FF:FF:FF:FF'))
-        self.assertTrue(validate_mac_address('ff:ff:ff:ff:ff:ff'))
+        self.assertEqual(str(MACAddress('FF:FF:FF:FF:FF:FF')), 'FF:FF:FF:FF:FF:FF')

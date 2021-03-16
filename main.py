@@ -3,7 +3,42 @@ import csv
 import json
 import urllib.request
 
-from typing import Dict
+from typing import Dict, List
+
+
+class OctetsSet:
+
+    def __init__(self, octets: str) -> None:
+        self._original_value = octets
+        self._octets = self._parse_octets()
+        self._validate()
+
+    def _parse_octets(self) -> List[str]:
+        return re.split(r'[:-]', self._original_value)
+
+    def _validate(self) -> None:
+        for octet in self._octets:
+            if len(octet) != 2:
+                raise ValueError('Invalid hexadecimal representation of octet')
+            try:
+                int(octet, base=16)
+            except ValueError:
+                raise ValueError('Invalid octet')
+
+    def __str__(self) -> str:
+        return ':'.join(self._octets).upper()
+
+
+class MACAddress(OctetsSet):
+
+    def __init__(self, octets: str) -> None:
+        super().__init__(octets)
+        self.oui = OctetsSet(':'.join(self._octets[:3]))
+        self.vendor_specific = OctetsSet(':'.join(self._octets[-3:]))
+
+    def _validate(self) -> None:
+        if len(self._octets) != 6:
+            raise ValueError('Too few octets')
 
 
 class OUIList:
@@ -35,20 +70,6 @@ class OUIList:
     def _load(self) -> Dict[str, str]:
         with open(self.storage_filename) as json_file:
             return json.load(json_file)
-
-
-def validate_mac_address(mac_address: str) -> bool:
-    octets = re.split(r'[:-]', mac_address)
-    if len(octets) != 6:
-        return False
-    for octet in octets:
-        if len(octet) != 2:
-            return False
-        try:
-            int(octet, base=16)
-        except ValueError:
-            return False
-    return True
 
 
 if __name__ == '__main__':
