@@ -2,21 +2,30 @@ import os
 import glob
 import unittest
 
-from main import OUIList, OctetsSet, MACAddress
+from unittest.mock import MagicMock
+from typing import Callable, Dict
+
+from main import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
 
 
 class TestOUIList(unittest.TestCase):
     TEST_STORAGE_FILENAME = 'test_oui_{postfix}.json'
 
+    def setUp(self) -> None:
+        self.src = OUIRemoteSrc()
+        self.src.fetch = MagicMock(return_value={'FFFFFF': 'Broadcast'})
+
     def test_preloading_empty_oui_list(self) -> None:
-        oui_list = OUIList(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
+        storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
+        oui_list = OUIList(self.src, storage)
         self.assertDictEqual(oui_list.data, {})
         self.assertEqual(len(oui_list.data), 0)
 
     def test_fetching_oui_list_from_ieee(self) -> None:
-        oui_list = OUIList(self.TEST_STORAGE_FILENAME.format(postfix='fetching'))
-        oui_list.fetch_from_ieee()
-        self.assertTrue(isinstance(oui_list.data, dict))
+        storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='fetching'))
+        oui_list = OUIList(self.src, storage)
+        oui_list.update()
+        self.assertDictEqual(oui_list.data, {'FFFFFF': 'Broadcast'})
         self.assertNotEqual(len(oui_list.data), 0)
 
     def tearDown(self) -> None:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import csv
 import json
@@ -42,34 +44,45 @@ class MACAddress(OctetsSet):
 
 
 class OUIList:
-    IEEE_SRC = 'http://standards-oui.ieee.org/oui/oui.csv'
+    def __init__(self, src: OUIRemoteSrc, storage: OUIJsonStorage):
+        self.src = src
+        self.storage = storage
+        self.data: Dict[str, str] = self._load()
 
-    def __init__(self, storage_filename: str = 'oui.json'):
-        self.storage_filename = storage_filename
-        self.data: Dict[str, str] = {}
-        self.load()
+    def _load(self) -> Dict[str, str]:
+        try:
+            return self.storage.load()
+        except FileNotFoundError:
+            return {}
 
-    def fetch_from_ieee(self) -> None:
-        with urllib.request.urlopen(self.IEEE_SRC) as response:
+    def update(self) -> None:
+        self.data = self.src.fetch()
+        self.storage.dump(self.data)
+
+
+class OUIJsonStorage:
+
+    def __init__(self, filename: str = 'oui.json'):
+        self.filename = filename
+
+    def dump(self, data) -> None:
+        with open(self.filename, 'w') as file:
+            json.dump(data, file)
+
+    def load(self) -> Dict[str, str]:
+        with open(self.filename) as json_file:
+            return json.load(json_file)
+
+
+class OUIRemoteSrc:
+    URL = 'http://standards-oui.ieee.org/oui/oui.csv'
+
+    def fetch(self) -> Dict[str, str]:
+        with urllib.request.urlopen(self.URL) as response:
             content = response.read().decode()
             reader = csv.reader(content.splitlines())
             next(reader)  # skip headers
-            self.data = {oui: vendor for _, oui, vendor, _ in reader}
-        self.dump()
-
-    def dump(self) -> None:
-        with open(self.storage_filename, 'w') as file:
-            json.dump(self.data, file)
-
-    def load(self) -> None:
-        try:
-            self.data = self._load()
-        except FileNotFoundError:
-            self.data = {}
-
-    def _load(self) -> Dict[str, str]:
-        with open(self.storage_filename) as json_file:
-            return json.load(json_file)
+            return {oui: vendor for _, oui, vendor, _ in reader}
 
 
 if __name__ == '__main__':
