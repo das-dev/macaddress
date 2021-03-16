@@ -11,10 +11,12 @@ class TestOUIList(unittest.TestCase):
     def test_preloading_empty_oui_list(self) -> None:
         oui_list = OUIList(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
         self.assertDictEqual(oui_list.data, {})
+        self.assertEqual(len(oui_list.data), 0)
 
     def test_fetching_oui_list_from_ieee(self) -> None:
         oui_list = OUIList(self.TEST_STORAGE_FILENAME.format(postfix='fetching'))
         oui_list.fetch_from_ieee()
+        self.assertTrue(isinstance(oui_list.data, dict))
         self.assertNotEqual(len(oui_list.data), 0)
 
     def tearDown(self) -> None:

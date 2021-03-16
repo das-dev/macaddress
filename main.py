@@ -2,13 +2,15 @@ import csv
 import json
 import urllib.request
 
+from typing import Dict
+
 
 class OUIList:
     IEEE_SRC = 'http://standards-oui.ieee.org/oui/oui.csv'
 
     def __init__(self, storage_filename: str = 'oui.json'):
         self.storage_filename = storage_filename
-        self.data = {}
+        self.data: Dict[str, str] = {}
         self.load()
 
     def fetch_from_ieee(self) -> None:
@@ -29,7 +31,7 @@ class OUIList:
         except FileNotFoundError:
             self.data = {}
 
-    def _load(self) -> dict:
+    def _load(self) -> Dict[str, str]:
         with open(self.storage_filename) as json_file:
             return json.load(json_file)
 
