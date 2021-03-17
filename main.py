@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import csv
+import sys
 import json
 import urllib.request
 
@@ -43,26 +44,6 @@ class MACAddress(OctetsSet):
             raise ValueError('Too few octets')
 
 
-class OUIList:
-    def __init__(self, src: OUIRemoteSrc, storage: OUIJsonStorage):
-        self.src = src
-        self.storage = storage
-        self.data: Dict[str, str] = self.storage.load()
-
-    def update(self) -> None:
-        self.data = self._normalize(self.src.fetch())
-        self.storage.dump(self.data)
-
-    def _normalize(self, data: Dict[str, str]) -> Dict[str, str]:
-        return {str(OctetsSet(octets)): vendor for octets, vendor in data.items()}
-
-    def lookup_by_oui(self, octets: str) -> Optional[str]:
-        return self.data.get(str(OctetsSet(octets)))
-
-    def lookup_by_mac(self, octets: str) -> Optional[str]:
-        return self.data.get(str(MACAddress(octets).oui))
-
-
 class OUIJsonStorage:
 
     def __init__(self, filename: str = 'oui.json'):
@@ -91,5 +72,40 @@ class OUIRemoteSrc:
             return {oui: vendor for _, oui, vendor, _ in reader}
 
 
+class OUIList:
+    def __init__(self, src: OUIRemoteSrc = OUIRemoteSrc(), storage: OUIJsonStorage = OUIJsonStorage()):
+        self.src = src
+        self.storage = storage
+        self.data: Dict[str, str] = self.storage.load()
+
+    def update(self) -> None:
+        self.data = self._normalize(self.src.fetch())
+        self.storage.dump(self.data)
+
+    def _normalize(self, data: Dict[str, str]) -> Dict[str, str]:
+        return {str(OctetsSet(octets)): vendor for octets, vendor in data.items()}
+
+    def lookup_by_oui(self, octets: str) -> Optional[str]:
+        return self.data.get(str(OctetsSet(octets)))
+
+    def lookup_by_mac(self, octets: str) -> Optional[str]:
+        return self.data.get(str(MACAddress(octets).oui))
+
+
+def cli():
+    try:
+        param, value = sys.argv[1:]
+    except ValueError:
+        return
+    if param != 'lookup-mac':
+        return
+    if vendor := OUIList().lookup_by_mac(value):
+        sys.stdout.write(f'{vendor}\n')
+    else:
+        sys.stdout.write('Sorry, vendor not found\n')
+
+
 if __name__ == '__main__':
-    pass
+    cli()
+
+
