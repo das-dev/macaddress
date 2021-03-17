@@ -2,8 +2,7 @@ import os
 import glob
 import unittest
 
-from unittest.mock import MagicMock
-from typing import Callable, Dict
+from unittest.mock import patch
 
 from main import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
 
@@ -11,22 +10,22 @@ from main import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
 class TestOUIList(unittest.TestCase):
     TEST_STORAGE_FILENAME = 'test_oui_{postfix}.json'
 
-    def setUp(self) -> None:
-        self.src = OUIRemoteSrc()
-        self.src.fetch = MagicMock(return_value={'FFFFFF': 'Broadcast'})
-
     def test_preloading_empty_oui_list(self) -> None:
-        storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
-        oui_list = OUIList(self.src, storage)
-        self.assertDictEqual(oui_list.data, {})
-        self.assertEqual(len(oui_list.data), 0)
+        with patch.object(OUIRemoteSrc, 'fetch', return_value={'FFFFFF': 'Broadcast'}):
+            src = OUIRemoteSrc()
+            storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
+            oui_list = OUIList(src, storage)
+            self.assertDictEqual(oui_list.data, {})
+            self.assertEqual(len(oui_list.data), 0)
 
     def test_fetching_oui_list_from_ieee(self) -> None:
-        storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='fetching'))
-        oui_list = OUIList(self.src, storage)
-        oui_list.update()
-        self.assertDictEqual(oui_list.data, {'FFFFFF': 'Broadcast'})
-        self.assertNotEqual(len(oui_list.data), 0)
+        with patch.object(OUIRemoteSrc, 'fetch', return_value={'FFFFFF': 'Broadcast'}):
+            src = OUIRemoteSrc()
+            storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='fetching'))
+            oui_list = OUIList(src, storage)
+            oui_list.update()
+            self.assertDictEqual(oui_list.data, {'FFFFFF': 'Broadcast'})
+            self.assertNotEqual(len(oui_list.data), 0)
 
     def tearDown(self) -> None:
         for filename in glob.glob(self.TEST_STORAGE_FILENAME.format(postfix='*')):
