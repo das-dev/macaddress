@@ -5,7 +5,7 @@ import csv
 import json
 import urllib.request
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 class OctetsSet:
@@ -16,7 +16,7 @@ class OctetsSet:
         self._validate()
 
     def _parse_octets(self) -> List[str]:
-        return re.split(r'[:-]', self._original_value)
+        return re.findall(r'\w{1,2}', self._original_value)
 
     def _validate(self) -> None:
         for octet in self._octets:
@@ -50,8 +50,14 @@ class OUIList:
         self.data: Dict[str, str] = self.storage.load()
 
     def update(self) -> None:
-        self.data = self.src.fetch()
+        self.data = self._normalize(self.src.fetch())
         self.storage.dump(self.data)
+
+    def _normalize(self, data: Dict[str, str]) -> Dict[str, str]:
+        return {str(OctetsSet(octets)): vendor for octets, vendor in data.items()}
+
+    def lookup(self, octets: str) -> Optional[str]:
+        return self.data.get(str(OctetsSet(octets)))
 
 
 class OUIJsonStorage:

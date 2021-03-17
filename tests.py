@@ -19,14 +19,19 @@ class TestOUIList(unittest.TestCase):
 
     @patch('main.OUIRemoteSrc')
     @patch('main.OUIJsonStorage')
-    def test_updating_empty_oui_list_from_src(self, mock_storage: MagicMock, mock_src: MagicMock) -> None:
+    def test_updated_oui_list_from_src(self, mock_storage: MagicMock, mock_src: MagicMock) -> None:
         mock_src.fetch.return_value = {'FFFFFF': 'Broadcast'}
         mock_storage.load.return_value = {}
         oui_list = OUIList(mock_src, mock_storage)
         oui_list.update()
 
-        self.assertDictEqual(oui_list.data, {'FFFFFF': 'Broadcast'})
-        mock_storage.dump.assert_called_once_with({'FFFFFF': 'Broadcast'})
+        self.assertDictEqual(oui_list.data, {'FF:FF:FF': 'Broadcast'})
+        self.assertEqual(oui_list.lookup('FFFFFF'), 'Broadcast')
+        self.assertEqual(oui_list.lookup('FF:FF:FF'), 'Broadcast')
+        self.assertIsNone(oui_list.lookup('00:00:00'))
+        with self.assertRaises(ValueError):
+            oui_list.lookup('FF:FF:F')
+        mock_storage.dump.assert_called_once_with({'FF:FF:FF': 'Broadcast'})
         mock_storage.load.assert_called_once()
 
 
@@ -60,12 +65,6 @@ class TestOUIRemoteSrc(unittest.TestCase):
 class TestMACAddress(unittest.TestCase):
 
     def test_invalid_octets_set(self) -> None:
-        with self.assertRaises(ValueError):
-            OctetsSet(':FF:FF:FF')
-        with self.assertRaises(ValueError):
-            OctetsSet('FF:FF:FF:')
-        with self.assertRaises(ValueError):
-            OctetsSet('FF.FF.FF')
         with self.assertRaises(ValueError):
             OctetsSet('FF:FF:XY')
         with self.assertRaises(ValueError):
