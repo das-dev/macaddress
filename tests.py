@@ -16,7 +16,6 @@ class TestOUIList(unittest.TestCase):
         storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
         oui_list = OUIList(mock_src, storage)
         self.assertDictEqual(oui_list.data, {})
-        self.assertEqual(len(oui_list.data), 0)
 
     @patch('main.OUIRemoteSrc')
     def test_fetching_oui_list_from_ieee(self, mock_src: MagicMock) -> None:
@@ -25,7 +24,6 @@ class TestOUIList(unittest.TestCase):
         oui_list = OUIList(mock_src, storage)
         oui_list.update()
         self.assertDictEqual(oui_list.data, {'FFFFFF': 'Broadcast'})
-        self.assertNotEqual(len(oui_list.data), 0)
 
     def tearDown(self) -> None:
         for filename in glob.glob(self.TEST_STORAGE_FILENAME.format(postfix='*')):
