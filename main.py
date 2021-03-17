@@ -47,13 +47,7 @@ class OUIList:
     def __init__(self, src: OUIRemoteSrc, storage: OUIJsonStorage):
         self.src = src
         self.storage = storage
-        self.data: Dict[str, str] = self._load()
-
-    def _load(self) -> Dict[str, str]:
-        try:
-            return self.storage.load()
-        except FileNotFoundError:
-            return {}
+        self.data: Dict[str, str] = self.storage.load()
 
     def update(self) -> None:
         self.data = self.src.fetch()
@@ -70,8 +64,11 @@ class OUIJsonStorage:
             json.dump(data, file)
 
     def load(self) -> Dict[str, str]:
-        with open(self.filename) as json_file:
-            return json.load(json_file)
+        try:
+            with open(self.filename) as json_file:
+                return json.load(json_file)
+        except FileNotFoundError:
+            return {}
 
 
 class OUIRemoteSrc:
