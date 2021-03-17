@@ -2,30 +2,30 @@ import os
 import glob
 import unittest
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
-from main import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
+from main import OUIList, OUIJsonStorage, OctetsSet, MACAddress
 
 
 class TestOUIList(unittest.TestCase):
     TEST_STORAGE_FILENAME = 'test_oui_{postfix}.json'
 
-    def test_preloading_empty_oui_list(self) -> None:
-        with patch.object(OUIRemoteSrc, 'fetch', return_value={'FFFFFF': 'Broadcast'}):
-            src = OUIRemoteSrc()
-            storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
-            oui_list = OUIList(src, storage)
-            self.assertDictEqual(oui_list.data, {})
-            self.assertEqual(len(oui_list.data), 0)
+    @patch('main.OUIRemoteSrc')
+    def test_preloading_empty_oui_list(self, mock_src: MagicMock) -> None:
+        mock_src.fetch.return_value = {'FFFFFF': 'Broadcast'}
+        storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='preloading'))
+        oui_list = OUIList(mock_src, storage)
+        self.assertDictEqual(oui_list.data, {})
+        self.assertEqual(len(oui_list.data), 0)
 
-    def test_fetching_oui_list_from_ieee(self) -> None:
-        with patch.object(OUIRemoteSrc, 'fetch', return_value={'FFFFFF': 'Broadcast'}):
-            src = OUIRemoteSrc()
-            storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='fetching'))
-            oui_list = OUIList(src, storage)
-            oui_list.update()
-            self.assertDictEqual(oui_list.data, {'FFFFFF': 'Broadcast'})
-            self.assertNotEqual(len(oui_list.data), 0)
+    @patch('main.OUIRemoteSrc')
+    def test_fetching_oui_list_from_ieee(self, mock_src: MagicMock) -> None:
+        mock_src.fetch.return_value = {'FFFFFF': 'Broadcast'}
+        storage = OUIJsonStorage(self.TEST_STORAGE_FILENAME.format(postfix='fetching'))
+        oui_list = OUIList(mock_src, storage)
+        oui_list.update()
+        self.assertDictEqual(oui_list.data, {'FFFFFF': 'Broadcast'})
+        self.assertNotEqual(len(oui_list.data), 0)
 
     def tearDown(self) -> None:
         for filename in glob.glob(self.TEST_STORAGE_FILENAME.format(postfix='*')):
