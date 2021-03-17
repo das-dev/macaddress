@@ -56,8 +56,11 @@ class OUIList:
     def _normalize(self, data: Dict[str, str]) -> Dict[str, str]:
         return {str(OctetsSet(octets)): vendor for octets, vendor in data.items()}
 
-    def lookup(self, octets: str) -> Optional[str]:
+    def lookup_by_oui(self, octets: str) -> Optional[str]:
         return self.data.get(str(OctetsSet(octets)))
+
+    def lookup_by_mac(self, octets: str) -> Optional[str]:
+        return self.data.get(str(MACAddress(octets).oui))
 
 
 class OUIJsonStorage:
