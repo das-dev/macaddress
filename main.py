@@ -99,7 +99,10 @@ def cli():
         return
     if param != 'lookup-mac':
         return
-    if vendor := OUIList().lookup_by_mac(value):
+    oui_list = OUIList()
+    if not oui_list.data:
+        oui_list.update()
+    if vendor := oui_list.lookup_by_mac(value):
         sys.stdout.write(f'{vendor}\n')
     else:
         sys.stdout.write('Sorry, vendor not found\n')
