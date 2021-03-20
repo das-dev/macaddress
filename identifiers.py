@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 import csv
-import sys
 import json
 import urllib.request
 
@@ -90,25 +89,3 @@ class OUIList:
 
     def lookup_by_mac(self, octets: str) -> Optional[str]:
         return self.data.get(str(MACAddress(octets).oui))
-
-
-def cli():
-    try:
-        param, value = sys.argv[1:]
-    except ValueError:
-        return
-    if param != 'lookup-mac':
-        return
-    oui_list = OUIList()
-    if not oui_list.data:
-        oui_list.update()
-    if vendor := oui_list.lookup_by_mac(value):
-        sys.stdout.write(f'{vendor}\n')
-    else:
-        sys.stdout.write('Sorry, vendor not found\n')
-
-
-if __name__ == '__main__':
-    cli()
-
-

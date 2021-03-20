@@ -2,7 +2,7 @@ import unittest
 
 from unittest.mock import patch, MagicMock
 
-from main import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
+from macaddress import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
 
 TEST_OUI_LIST = {
     '002272': 'American Micro-Fuel Device Corp.',
