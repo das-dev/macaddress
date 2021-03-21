@@ -1,10 +1,10 @@
 import argparse
 import textwrap
 
-from identifiers import OUIList, MACAddress
+from identifiers import MACAddress
 
 
-def cli():
+def cli() -> None:
     parser = argparse.ArgumentParser(
         allow_abbrev=False,
         formatter_class=argparse.RawTextHelpFormatter,

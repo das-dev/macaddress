@@ -5,7 +5,7 @@ import csv
 import json
 import urllib.request
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 
 class OctetsSet:
@@ -48,11 +48,11 @@ class OUIJsonStorage:
     def __init__(self, filename: str = 'oui.json'):
         self.filename = filename
 
-    def dump(self, data) -> None:
+    def dump(self, data: Dict[str, str]) -> None:
         with open(self.filename, 'w') as file:
             json.dump(data, file)
 
-    def load(self) -> Dict[str, str]:
+    def load(self) -> Any:
         try:
             with open(self.filename) as json_file:
                 return json.load(json_file)
