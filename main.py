@@ -1,4 +1,4 @@
-from cli import cli
+from macaddress.cli import cli
 
 
 if __name__ == '__main__':

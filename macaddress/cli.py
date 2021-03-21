@@ -1,7 +1,7 @@
 import argparse
 import textwrap
 
-from identifiers import MACAddress
+from macaddress.identifiers import MACAddress
 
 
 def cli() -> None:

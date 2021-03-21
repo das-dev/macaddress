@@ -2,7 +2,7 @@ import unittest
 
 from unittest.mock import patch, MagicMock
 
-from identifiers import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
+from macaddress.identifiers import OUIList, OUIRemoteSrc, OUIJsonStorage, OctetsSet, MACAddress
 
 TEST_OUI_LIST = {
     '002272': 'American Micro-Fuel Device Corp.',
@@ -16,8 +16,8 @@ TEST_NORMALIZED_OUI_LIST = {
 
 class TestOUIList(unittest.TestCase):
 
-    @patch('identifiers.OUIRemoteSrc')
-    @patch('identifiers.OUIJsonStorage')
+    @patch('macaddress.identifiers.OUIRemoteSrc')
+    @patch('macaddress.identifiers.OUIJsonStorage')
     def test_preloading_empty_oui_list_from_empty_src(self, mock_storage: MagicMock, mock_src: MagicMock) -> None:
         mock_src.fetch.return_value = TEST_OUI_LIST
         mock_storage.load.return_value = {}
@@ -26,8 +26,8 @@ class TestOUIList(unittest.TestCase):
         self.assertDictEqual(oui_list.data, {})
         mock_storage.load.assert_called_once()
 
-    @patch('identifiers.OUIRemoteSrc')
-    @patch('identifiers.OUIJsonStorage')
+    @patch('macaddress.identifiers.OUIRemoteSrc')
+    @patch('macaddress.identifiers.OUIJsonStorage')
     def test_updated_oui_list_from_src(self, mock_storage: MagicMock, mock_src: MagicMock) -> None:
         mock_src.fetch.return_value = TEST_OUI_LIST
         mock_storage.load.return_value = {}
@@ -65,7 +65,7 @@ class TestOUIList(unittest.TestCase):
 
 class TestOUIJsonStorage(unittest.TestCase):
 
-    @patch('identifiers.open')
+    @patch('macaddress.identifiers.open')
     def test_preloading_empty_oui_list_from_missed_src(self, mock_open: MagicMock) -> None:
         mock_open.side_effect = FileNotFoundError()
 
@@ -80,7 +80,7 @@ class TestOUIRemoteSrc(unittest.TestCase):
     MA-L,00D0EF,IGT,9295 PROTOTYPE DRIVE RENO NV US 89511
     '''
 
-    @patch('identifiers.urllib.request')
+    @patch('macaddress.identifiers.urllib.request')
     def test_parsing_oui_src(self, mock_request: MagicMock) -> None:
         mock_response = MagicMock()
         mock_response.read.return_value = self.CSV.strip()
