@@ -1,4 +1,4 @@
 ##### Run tests:
 ```shell
-python -m unittest tests.py
+python -m unittest discover -s tests
 ```
