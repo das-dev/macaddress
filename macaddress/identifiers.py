@@ -5,7 +5,7 @@ import csv
 import json
 import urllib.request
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any, Iterator, ClassVar, Optional
 
 
 class OctetsSet:
@@ -61,12 +61,12 @@ class OUIJsonStorage:
 
 
 class OUIRemoteSrc:
-    URL = 'http://standards-oui.ieee.org/oui/oui.csv'
+    URL: ClassVar[str] = 'http://standards-oui.ieee.org/oui/oui.csv'
 
     def fetch(self) -> Dict[str, str]:
         with urllib.request.urlopen(self.URL) as response:
-            content = response.read().decode()
-            reader = csv.reader(content.splitlines())
+            content: str = response.read().decode()
+            reader: Iterator[List[str]] = csv.reader(content.splitlines())
             next(reader)  # skip headers
             return {oui: vendor for _, oui, vendor, _ in reader}
 
